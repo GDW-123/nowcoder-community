@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>测试2</title>
+</head>
+<body>
+<!--我们可以通过这个表单将从页面上面的数据传递到后端，但是前提是数据的字段必须是对应的-->
+<form method="post" action="/community/alpha/test2">
+    <p>
+        姓名 : <input type="text" name="username" />
+    </p>
+    <p>
+        年龄 : <input type="text" name="age" />
+    </p>
+    <p>
+        <input type="submit" value="保存" />
+    </p>
+</form>
+
+</body>
+</html>

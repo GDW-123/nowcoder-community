@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--这里的名称空间就是对应的mapper类（就是相应的dao的方法）-->
+<mapper namespace="com.nowcoder.community.dao.UserMapper">
+
+    <!--在这里定义一个sql字段，在后面进行引入，这样得话就不需要每次都写这些字段了，只需要通过include来进行引入即可-->
+    <sql id="selectFields">
+        id,username,password,salt,email,type,status,activation_code,header_url,create_time
+    </sql>
+
+    <sql id="insertFields">
+        username,password,salt,email,type,status,activation_code,header_url,create_time
+    </sql>
+    <!--根据id进行查询,返回值就是方法的返回值，如果返回值是一个List集合，那么返回值就是泛型的类型-->
+    <!--这里的id就是方法名-->
+    <!--User selectById(int id);-->
+    <select id="selectById" resultType="User">
+        select <include refid="selectFields"/>
+        from user
+        where id = #{id}
+    </select>
+
+    <!--根据用户名查询-->
+    <!--User selectByName(String username);-->
+    <select id="selectByName" resultType="User">
+        select <include refid="selectFields"/>
+        from user
+        where username = #{username}
+    </select>
+
+    <!--根据邮箱查询-->
+    <!--User selectByEmail(String email);-->
+    <select id="selectByEmail" resultType="User">
+        select <include refid="selectFields"/>
+        from user
+        where email = #{email}
+    </select>
+
+    <!--插入用户-->
+    <!--int insertUser(User user);-->
+    <!--字段id对应的属性是什么，这里的id就是User类里面的id-->
+    <!--这里要注意的是values后面的数据是属性，所以要对应好实体类User中的字段-->
+    <insert id="insertUser" parameterType="User" keyProperty="id">
+        insert into user (<include refid="insertFields" />)
+        values (#{username},#{password},#{salt},#{email},#{type},#{status},#{activationCode},#{headerUrl},#{createTime})
+    </insert>
+
+    <!--更新状态-->
+    <!--int updateStatus(int id,int status);-->
+    <update id="updateStatus">
+        update user set status = #{status} where id = #{id}
+    </update>
+
+
+    <!--更新用户头像-->
+    <!--因为在这里我们返回的是int简单类型，因此，我们也可以不用写返回值类型-->
+    <!--int updateHeader(int id,String headerUrl);-->
+    <update id="updateHeader">
+        /*前面的header_url是数据库中的字段，而headerUrl是我们传入的参数中（实体类）的字段*/
+        update user set header_url = #{headerUrl} where id = #{id}
+    </update>
+
+
+    <!--修改密码-->
+    <!--int updatePassword(int id,String password);-->
+    <update id="updatePassword">
+        update user set password = #{password} where id = #{id}
+    </update>
+</mapper>
+

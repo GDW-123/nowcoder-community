@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nowcoder.community.dao.DiscussPostMapper">
+
+
+    <sql id="selectFields">
+        id,user_id,title,content,type,status,create_time,comment_count,score
+    </sql>
+
+    <sql id="insertFields">
+        user_id, title, content, type, status, create_time, comment_count, score
+    </sql>
+
+    <!--分页查询，显示所有的数据-->
+    <!--此时的返回值类型只需要申明泛型即可，而不需要去声明这是一个List集合-->
+    <!--List<DiscussPost> selectDiscussPosts(int userId, int offset, int limit);-->
+    <select id="selectDiscussPosts" resultType="DiscussPost">
+        select <include refid="selectFields" />
+        from Discuss_post
+        /*2表示的是拉黑的帖子，所以我们不会显示拉黑的帖子*/
+        where status != 2
+        <!--这里需要有条件判断-->
+        <!--
+			我们在进行查找的时候可以会传参数，也可能不会传参数，当我们在传参数的时候，就需要将该参数拼接进sql语句中了，
+			这个是为了以后的一些功能了，就不需要再进行重新去编写mapper方法和sql语句
+		-->
+
+        <if test="userId != 0">
+            and user_id = #{userId}
+        </if>
+        /*表示置顶的要放在前面，最新的放在前面*/
+        <if test="orderMode==0">
+            order by type desc,create_time desc
+        </if>
+        <if test="orderMode==1">
+            order by type desc,score desc,create_time desc
+        </if>
+        limit #{offset},#{limit}
+    </select>
+
+    <!--查询所有的数据的数量-->
+    <!--int selectDiscussPostRows(@Param("userId") int userId);-->
+    <select id="selectDiscussPostRows" resultType="Integer">
+        select count(id)
+        from Discuss_post
+        where status != 2
+        <if test="userId != 0">
+            and user_id = #{userId}
+        </if>
+    </select>
+
+    <!--用于帖子的发布-->
+    <!--int insertDiscussPost(DiscussPost discussPost);-->
+    <insert id="insertDiscussPost" parameterType="DiscussPost" keyProperty="id">
+        insert into discuss_post(<include refid="insertFields"></include>)
+        values(#{userId},#{title},#{content},#{type},#{status},#{createTime},#{commentCount},#{score})
+    </insert>
+
+    <!--查询帖子的详细信息-->
+    <!--DiscussPost selectDiscussPostById(int id);-->
+    <select id="selectDiscussPostById" resultType="DiscussPost">
+        select <include refid="selectFields"></include>
+        from discuss_post
+        where id = #{id}
+    </select>
+
+    <!--更新帖子的数量-->
+    <!--int updateCommentCount(int id, int commentCount);-->
+    <update id="updateCommentCount">
+        update discuss_post set comment_count = #{commentCount} where id = #{id}
+    </update>
+
+    <!--修改帖子的类型，用于置顶操作-->
+    <!--int updateType(int id, int type);-->
+    <update id="updateType">
+        update discuss_post set type = #{type} where id = #{id}
+    </update>
+
+    <!--修改帖子的状态，用于加精操作-->
+    <!--int updateStatus(int id, int status);-->
+    <update id="updateStatus">
+        update discuss_post set status = #{status} where id = #{id}
+    </update>
+
+
+    <!--修改帖子的分数，便于最热帖子的排行-->
+    <!--int updateScore(int id, double score);-->
+    <update id="updateScore">
+        update discuss_post set score = #{score} where id = #{id}
+    </update>
+</mapper>
